@@ -423,7 +423,7 @@ int debugger_loop(void *arg) {
             num_breakpoints++;
             printf("Added breakpoint at 0x%08X.\n", value);
         }
-        else if (strncmp(input, "bp range ", 7) == 0) {
+        else if (strncmp(input, "bp range ", 9) == 0) {
             uint32_t addr, size, flags;
             if (sscanf(input, "bp range %i %i %i", &addr, &size, &flags) == 3) {
             } else {
@@ -452,6 +452,39 @@ int debugger_loop(void *arg) {
             breakpoints[num_breakpoints] = bkpt;
             num_breakpoints++;
             printf("Added breakpoint range for [0x%08X to 0x%08X].\n", addr, addr + size);
+        }
+        else if (strncmp(input, "bp lookup ", 10) == 0) {
+            uint32_t addr, size, flags;
+            if (sscanf(input, "bp lookup %i %i %i", &addr, &size, &flags) == 3) {
+            } else {
+                printf("Improperly formatted breakpoint lookup command: '%s'\n", input);
+                continue;
+            }
+
+            printf("Looking up breakpoint at 0x%08x with size %d and flags %x...\n",
+                    addr, size, flags);
+            int bpIdx = (*DebugBreakpointLookup)(addr, size, flags);
+            if (bpIdx == -1) {
+                printf("\tBreakpoint not found.\n");
+            } else {
+                printf("\tBreakpoint index found: %d\n", bpIdx);
+            }
+        }
+        else if (strncmp(input, "bp check ", 9) == 0) {
+            uint32_t addr;
+            if (sscanf(input, "bp check %i", &addr) == 1) {
+            } else {
+                printf("Improperly formatted breakpoint check command: '%s'\n", input);
+                continue;
+            }
+
+            printf("Checking breakpoint at 0x%08x...\n", addr);
+            int bpIdx = (*DebugBreakpointCommand)(M64P_BKP_CMD_CHECK, addr, NULL);
+            if (bpIdx == -1) {
+                printf("\tBreakpoint not found.\n");
+            } else {
+                printf("\tBreakpoint index found: %d\n", bpIdx);
+            }
         }
         else if (strncmp(input, "bp rm ", 6) == 0) {
             int index = -1;
