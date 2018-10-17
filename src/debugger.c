@@ -314,6 +314,29 @@ int debugger_loop(void *arg) {
                 printf("\n");
             }
         }
+        else if (strncmp(input, "mflags", 6) == 0) {
+            uint32_t addr;
+            if (sscanf(input, "mflags %i", &addr) == 1) {
+            } else {
+                printf("Improperly formatted memory flags command: '%s'\n", input);
+                continue;
+            }
+            int memInfo = (*DebugMemGetMemInfo)(M64P_DBG_MEM_FLAGS, addr);
+            printf("Memory Flags @ 0x%08x: 0x%08x [", addr, memInfo);
+            if (memInfo & M64P_MEM_FLAG_READABLE) {
+                printf("M64P_MEM_FLAG_READABLE ");
+            }
+            if (memInfo & M64P_MEM_FLAG_WRITABLE) {
+                printf("M64P_MEM_FLAG_WRITABLE ");
+            }
+            if (memInfo & M64P_MEM_FLAG_READABLE_EMUONLY) {
+                printf("M64P_MEM_FLAG_READABLE_EMUONLY ");
+            }
+            if (memInfo & M64P_MEM_FLAG_WRITABLE_EMUONLY) {
+                printf("M64P_MEM_FLAG_WRITABLE_EMUONLY ");
+            }
+            printf("]\n");
+        }
         else if (strncmp(input, "write", 5) == 0) {
             uint32_t writeAddr, size=1;
             uint64_t writeVal;
