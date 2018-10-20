@@ -246,6 +246,40 @@ int debugger_loop(void *arg) {
             printf("%s", decoded);
             printf(" %s\n", decoded + 10);
         }
+        else if (strncmp(input, "disasm", 6) == 0) {
+            // simple linear sweep disassembly
+            uint32_t addr, size=1, flags;
+
+            int i;
+            uint32_t lookupAddr, lookupData;
+            char op[64];
+            char args[64];
+
+            if (sscanf(input, "disasm %i %i %i", &addr, &size, &flags) == 3) {
+            } else if (sscanf(input, "disasm %i %i", &addr, &size) == 2) {
+            } else if (sscanf(input, "disasm %i", &addr) == 1) {
+            } else {
+                printf("Improperly formatted diassembly command: '%s'\n", input);
+                continue;
+            }
+            addr &= ~0x03; // align to 4 byte boundary
+            printf("Disassembly of %d instruction%s @ 0x%08x:\n", size, (size == 1 ? "" : "s"), addr);
+            for (i = 0; i < size; i++) {
+                lookupAddr = addr + (i * 4);
+                lookupData = debugger_read_32(lookupAddr);
+                (*DebugDecodeOp)(lookupData, op, args, lookupAddr);
+                if (flags & 0x01) {
+                    printf("% 3d ", i);
+                }
+                if (flags & 0x02) {
+                    printf("%08x ", lookupAddr);
+                }
+                if (flags & 0x04) {
+                    printf("[%08x] ", lookupData);
+                }
+                printf("%s %s\n", op, args);
+            }
+        }
         else if (strncmp(input, "mem", 3) == 0) {
             uint32_t readAddr, length=1, rows=1, size=4;
             uint32_t i, j;
