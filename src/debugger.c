@@ -348,6 +348,16 @@ int debugger_loop(void *arg) {
                 printf("\n");
             }
         }
+        else if (strncmp(input, "translate", 9) == 0) {
+            uint32_t virt_addr, phys_addr;
+            if (sscanf(input, "translate %i", &virt_addr) == 1) {
+            } else {
+                printf("Improperly formatted translate command: '%s'\n", input);
+                continue;
+            }
+            phys_addr = (*DebugVirtualToPhysical)(virt_addr);
+            printf("virtual 0x%08x -> physical 0x%08x\n", virt_addr, phys_addr);
+        }
         else if (strncmp(input, "mflags", 6) == 0) {
             uint32_t addr;
             if (sscanf(input, "mflags %i", &addr) == 1) {
